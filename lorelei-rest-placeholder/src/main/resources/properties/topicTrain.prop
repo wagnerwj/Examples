@@ -1,0 +1,37 @@
+#
+# Features
+#
+1.lowercase=true
+#1.lowercaseNGrams=true
+1.useString=true
+1.useNGrams=true
+1.maxNGramLeng=4
+1.minNGramLeng=1
+1.binnedLengths=10,20,30
+#
+# Printing
+#
+# printClassifier=HighWeight
+printClassifierParam=200
+#
+# Mapping
+#
+goldAnswerColumn=0
+displayedColumn=1
+#
+# Optimization
+#
+#useNB=true
+#usePrefixSuffixNGrams=true
+#intern=true
+sigma=5
+useQN=true
+QNsize=15
+tolerance=1e-4
+#
+# Training input
+#
+trainFile=./examples/topicDetect.train
+testFile=./examples/topicDetect.test
+
+serializeTo=examples/topicDetect.classifier
