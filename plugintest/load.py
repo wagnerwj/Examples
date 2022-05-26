@@ -9,9 +9,9 @@ import json
 import sqlite3
 import zipfile
 import requests
+from typing import  Mapping, Any
 import semantic_version
 import edmc_data
-from SubA import SubA
 from datetime import datetime
 from config import appname, appversion
 from queue import Queue
@@ -100,6 +100,21 @@ class PluginTest(object):
         return None
 
 
+    def send_data(url: str, data: Mapping[str, Any]) -> bool:  # noqa: CCR001
+        """
+         Write a set of events to the inara API.
+        :param url: the target URL to post to
+        :param data: the data to POST
+         :return: success state
+        """
+        # NB: As of 2022-01-25 Artie has stated the Inara API does *not* support compression
+        r = this.session.post(url, data=json.dumps(data, separators=(',', ':')), timeout=_TIMEOUT)
+        r.raise_for_status()
+        reply = r.json()
+        status = reply['header']['eventStatus']
+
+        return True
+
 def plugin_start3(plugin_dir: str) -> str:
     """
     Plugin startup method.
@@ -160,26 +175,23 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
             f', system = "{system}", station = "{station}"'
             f', event = "{entry["event"]}" "{now}"'
     )
-    event_type = entry['event']
-    """
-    send_data(TARGET_URL, f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
-            f', system = "{system}", station = "{station}"'
-            f', event = "{entry["event"]}"')
+    event_type = entry['event'].lower()
+
+   # send_data(TARGET_URL, f'cmdr = "{cmdrname}", is_beta = "{is_beta}"'
+    #        f', system = "{system}", station = "{station}"'
+    #        f', event = "{entry["event"]}"')
    
-                    if event_type in ("Location"):
+    if event_type in ('location', 'fsdjump', 'docked', 'carrierjump'):
                    
 
-                    if (timestamp > Globals.curtime) //If this is a current record (FSDJump processes all the time)
-                    {
-                        //Update the tracker with the system control faction.
-                        if (entry.SystemFaction != null)
-                        {
-                            if (entry.Factions != null)
-                            {
-                                if (entry.Factions.Count > 0)
-                                {
-                                    var Security = "";
-                                    if (entry.SystemSecurity != null) Security = ReplaceString(entry.SystemSecurity);
+                    entryFactions = entry['SystemFaction']
+                    #Update the tracker with the system control faction.
+                    if (entryFactions != null):
+                        
+                            
+                    
+                                    if (entry.SystemSecurity != null):
+                                        Security = ReplaceString(entry.SystemSecurity)
                                     TrackData(entry.StarSystem, "INFLUENCEFULL", 0, JsonConvert.SerializeObject(entry.Factions), ReplaceString(entry.SystemFaction), ReplaceString(Security));
                                 }
                             }else
@@ -188,7 +200,7 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
                                 TrackData(entry.StarSystem, "SYSTEM", 0, entry.SystemFaction);
                             }
 
-                        }
+                        
 
                         if (entry.Population != null)
                         {
@@ -196,7 +208,7 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
                         }
 
              
-                    }
+                    
 
                     break;
 
@@ -934,8 +946,7 @@ def journal_entry(cmdrname: str, is_beta: bool, system: str, station: str, entry
                                 break;
                                 
                                 
-    """                            
+                             
     this.plugin_test.store(entry['timestamp'], cmdrname, system, station, entry, state)
     
-
 
